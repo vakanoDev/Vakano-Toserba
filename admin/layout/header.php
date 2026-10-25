@@ -1,4 +1,5 @@
-<?php /* butuh: $judul, $aktif ('dashboard' atau nama tabel) */ ?>
+<?php /* butuh: $judul, $aktif ('dashboard' atau nama tabel) */
+/** @var array $TABEL */ ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -13,8 +14,14 @@
         .sidebar { background:rgba(15,23,42,.95); min-height:100vh; border-right:1px solid rgba(244,238,238,.1); }
         .nav-link { color:#f7f7f7; border-radius:10px; margin-bottom:3px; font-size:.9rem; transition:all .3s ease; }
         .nav-link:hover,.nav-link.active { background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%); color:#fff; }
+        .nav-link:hover { background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%); box-shadow:0 0 14px rgba(96,165,250,.7); }
         .card-custom { background:rgba(30,41,59,.7); backdrop-filter:blur(10px); border:1px solid rgba(244,237,237,.1); border-radius:15px; color:#fefefe; }
-        .table { --bs-table-bg:transparent; --bs-table-color:#fefefe; --bs-table-border-color:rgba(255,255,255,.1); }
+        .table { --bs-table-bg:transparent; --bs-table-color:#fefefe; --bs-table-border-color:rgba(255,255,255,.1);
+                 --bs-table-hover-color:#fff; --bs-table-hover-bg:rgba(59,130,246,.35); }
+        /* efek terang / bercahaya saat baris disentuh */
+        .table-hover > tbody > tr { transition:all .25s ease; }
+        .table-hover > tbody > tr:hover > * { background-color:rgba(59,130,246,.35); color:#fff; box-shadow:inset 0 0 20px rgba(96,165,250,.35); }
+        .table-hover > tbody > tr:hover { filter:drop-shadow(0 0 8px rgba(96,165,250,.6)); }
         .form-control,.form-select { background:#0f172a; color:#fff; border-color:rgba(255,255,255,.2); }
         .form-control:focus,.form-select:focus { background:#0f172a; color:#fff; }
         a.stat { text-decoration:none; color:inherit; transition:transform .2s; display:block; }
@@ -32,14 +39,14 @@
                 <?php $grupSekarang = '';
                 foreach ($TABEL as $kode => $tb):
                     if ($tb['grup'] !== $grupSekarang): $grupSekarang = $tb['grup']; ?>
-                        <li class="mt-3 mb-1"><small class="text-muted text-uppercase fw-bold" style="font-size:.7rem;"><?= e($grupSekarang); ?></small></li>
+                        <li class="mt-3 mb-1"><small class="text-white-50 text-uppercase fw-bold" style="font-size:.7rem;"><?= e($grupSekarang); ?></small></li>
                     <?php endif; ?>
                     <li><a href="tabel.php?t=<?= e($kode); ?>" class="nav-link <?= $aktif === $kode ? 'active' : ''; ?>"><i class="fa-solid <?= e($tb['ikon']); ?> me-2"></i> <?= e($tb['label']); ?></a></li>
                 <?php endforeach; ?>
             </ul>
         </div>
         <div class="pt-3 mt-3 border-top border-secondary border-opacity-25">
-            <span class="d-block small text-muted mb-2">Admin: <b><?= e($_SESSION['username'] ?? ''); ?></b></span>
+            <span class="d-block small text-white-50 mb-2">Admin: <b><?= e($_SESSION['username'] ?? ''); ?></b></span>
             <a href="../logout.php" class="btn btn-danger btn-sm w-100 rounded-pill fw-bold"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a>
         </div>
     </div>

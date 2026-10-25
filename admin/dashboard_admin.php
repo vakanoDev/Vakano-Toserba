@@ -1,5 +1,7 @@
 <?php
 require __DIR__ . '/layout/auth.php';
+/** @var mysqli $conn */
+/** @var array $TABEL */
 $judul = 'Dashboard Admin';
 $aktif = 'dashboard';
 
@@ -11,7 +13,7 @@ foreach ($TABEL as $kode => $tb) {
 require __DIR__ . '/layout/header.php';
 ?>
 <h2 class="mb-1">Dashboard Utama</h2>
-<p class="text-muted mb-4">Selamat datang, <b><?= e($_SESSION['username']); ?></b>. Pilih tabel untuk menambah, mengubah, atau menghapus data.</p>
+<p class="text-mb-4">Selamat datang, <b><?= e($_SESSION['username']); ?></b>. Pilih tabel untuk menambah, mengubah, atau menghapus data.</p>
 
 <?php $grupSekarang = '';
 foreach ($TABEL as $kode => $tb):

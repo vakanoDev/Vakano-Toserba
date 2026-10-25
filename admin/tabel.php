@@ -1,5 +1,6 @@
 <?php
-// Halaman CRUD generik untuk semua tabel di config/tabel_config.php
+/** @var mysqli $conn */
+/** @var array $TABEL */
 require __DIR__ . '/layout/auth.php';
 
 $t = $_GET['t'] ?? 'barang';
@@ -144,43 +145,46 @@ require __DIR__ . '/layout/header.php';
     </div>
 
 <?php else:
-    $data = mysqli_query($conn, "SELECT * FROM `$t` ORDER BY `$pk` DESC LIMIT 500"); ?>
+    // Daftar boleh dibaca dari VIEW (mis. akun_vu) dengan nama kolom sendiri; simpan/hapus tetap ke tabel asli
+    $sumber = $cfg['view']  ?? $t;
+    $vpk    = $cfg['vpk']   ?? $pk;
+    $vcols  = $cfg['vcols'] ?? $cols;
+    $data = mysqli_query($conn, "SELECT * FROM `$sumber` ORDER BY `$vpk` DESC LIMIT 500"); ?>
     <div class="card card-custom p-3">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
-                        <th>#<?= e($pk); ?></th>
-                        <?php foreach ($cols as $c): ?><th><?= e($c['l']); ?></th><?php endforeach; ?>
+                        <th>#<?= e($vpk); ?></th>
+                        <?php foreach ($vcols as $c): ?><th><?= e($c['l']); ?></th><?php endforeach; ?>
                         <th class="text-center" style="width:110px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                 <?php $ada = false; foreach ($data as $r): $ada = true; ?>
                     <tr>
-                        <td><?= e($r[$pk]); ?></td>
-                        <?php foreach ($cols as $c):
+                        <td><?= e($r[$vpk]); ?></td>
+                        <?php foreach ($vcols as $c):
                             $v = $r[$c['n']];
-                            if ($c['t'] === 'password')      $tampil = '••••••••';
-                            elseif ($v === null)             $tampil = '-';
+                            if ($v === null)             $tampil = '-';
                             elseif ($c['t'] === 'fk')        $tampil = $lookup[$c['n']][$v] ?? $v;
                             elseif ($c['t'] === 'select')    $tampil = ($c['opt'][$v] ?? $v);
                             else                             $tampil = $v; ?>
                             <td><?= e($tampil); ?></td>
                         <?php endforeach; ?>
                         <td class="text-center text-nowrap">
-                            <a href="tabel.php?t=<?= e($t); ?>&aksi=form&id=<?= e($r[$pk]); ?>" class="btn btn-sm btn-warning"><i class="fa-solid fa-pen"></i></a>
+                            <a href="tabel.php?t=<?= e($t); ?>&aksi=form&id=<?= e($r[$vpk]); ?>" class="btn btn-sm btn-warning"><i class="fa-solid fa-pen"></i></a>
                             <form method="POST" action="tabel.php?t=<?= e($t); ?>" class="d-inline" onsubmit="return confirm('Hapus data ini?');">
                                 <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']); ?>">
                                 <input type="hidden" name="aksi" value="hapus">
-                                <input type="hidden" name="id" value="<?= e($r[$pk]); ?>">
+                                <input type="hidden" name="id" value="<?= e($r[$vpk]); ?>">
                                 <button class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
                             </form>
                         </td>
                     </tr>
                 <?php endforeach; ?>
                 <?php if (!$ada): ?>
-                    <tr><td colspan="<?= count($cols) + 2; ?>" class="text-center text-muted py-4">Belum ada data.</td></tr>
+                    <tr><td colspan="<?= count($vcols) + 2; ?>" class="text-center text-muted py-4">Belum ada data.</td></tr>
                 <?php endif; ?>
                 </tbody>
             </table>

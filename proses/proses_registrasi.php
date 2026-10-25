@@ -1,5 +1,7 @@
 <?php
 require '../config/koneksi.php';
+/** @var mysqli $conn */
+
 
 if (isset($_POST['register'])) {
     $nama = mysqli_real_escape_string($conn, $_POST['nama']);

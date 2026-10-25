@@ -1,15 +1,18 @@
 <?php
+/** @var mysqli $conn */
+
 $host = "localhost";
-$user = "root";       // Sesuaikan dengan user database kamu
-$pass = "";           // Sesuaikan jika ada password
-$db   = "DB_UTS_PBD_DEVA";   // Ganti dengan nama database proyekmu
+$user = "root";
+$pass = "";
+$db   = "db_uts_pbd_deva";
 
-$conn = mysqli_connect("localhost", "root", "", "db_uts_pbd_deva");
-
-// Tambahkan baris ini untuk mematikan ONLY_FULL_GROUP_BY
-mysqli_query($conn, "SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))");
+$conn = mysqli_connect($host, $user, $pass, $db);
 
 if (!$conn) {
     die("Koneksi gagal: " . mysqli_connect_error());
 }
-?>
+
+mysqli_set_charset($conn, "utf8mb4");
+
+// Matikan ONLY_FULL_GROUP_BY (dibutuhkan role_vu yang GROUP BY nama_role saja)
+mysqli_query($conn, "SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))");

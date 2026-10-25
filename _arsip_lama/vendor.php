@@ -1,5 +1,6 @@
 <?php
 require '../config/koneksi.php';
+/** @var mysqli $conn */
 session_start();
 
 if (!isset($_SESSION['iduser']) || $_SESSION['idrole'] != 1) {

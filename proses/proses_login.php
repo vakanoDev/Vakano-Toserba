@@ -1,5 +1,7 @@
 <?php
 require '../config/koneksi.php';
+/** @var mysqli $conn */
+/** @var array $TABEL */
 session_start();
 
 if (isset($_POST['login'])) {

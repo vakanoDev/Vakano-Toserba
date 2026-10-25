@@ -10,7 +10,11 @@ $TABEL = [
   'role' => ['label' => 'Role', 'grup' => 'Master', 'ikon' => 'fa-user-shield', 'pk' => 'idrole', 'cols' => [
     c('nama_role', 'Nama Role', 'text', ['max' => 100]),
   ]],
-  'user' => ['label' => 'User / Pegawai', 'grup' => 'Master', 'ikon' => 'fa-users', 'pk' => 'iduser', 'cols' => [
+  'user' => ['label' => 'User / Pegawai', 'grup' => 'Master', 'ikon' => 'fa-users', 'pk' => 'iduser', 'view' => 'akun_vu', 'vpk' => 'ID Akun', 'vcols' => [
+    c('Username', 'Username'),
+    c('Password Akun', 'Password'),
+    c('Jabatan', 'Role'),
+  ], 'cols' => [
     c('username', 'Username', 'text', ['max' => 45]),
     c('password', 'Password (SHA-256)', 'password'),
     c('idrole', 'Role', 'fk', ['ref' => 'role', 'lab' => 'nama_role']),
