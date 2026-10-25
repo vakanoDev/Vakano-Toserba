@@ -78,7 +78,7 @@
         }
 
         .hero-section {
-            background: linear-gradient(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.75)), url('FotoTengahBeranda.jpg');
+            background: linear-gradient(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.75)), url('assets/img/FotoTengahBeranda.jpg');
             background-size: cover;
             background-position: center;
             border-radius: 20px;
@@ -166,7 +166,7 @@
             <div class="col-md-9 col-lg-7">
                 <div class="hero-section p-4 text-center">
                     <div class="mb-3">
-                        <img src="LogoBerandaUner.png" alt="Logo Vakano Toserba" style="max-height: 75px; width: auto;" class="shadow-sm rounded-circle border border-2 border-primary p-1 bg-white">
+                        <img src="assets/img/LogoBerandaUner.png" alt="Logo Vakano Toserba" style="max-height: 75px; width: auto;" class="shadow-sm rounded-circle border border-2 border-primary p-1 bg-white">
                     </div>
                     <h3 class="store-title mb-1">Vakano Toserba</h3>
                     <p class="text-dark fw-bold small mb-4">Toko Yang Berusaha Jadi Terlengkap & Termurah</p>

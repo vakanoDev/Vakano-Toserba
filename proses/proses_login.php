@@ -1,5 +1,5 @@
 <?php
-require 'koneksi.php';
+require '../config/koneksi.php';
 session_start();
 
 if (isset($_POST['login'])) {
@@ -17,18 +17,18 @@ if (isset($_POST['login'])) {
 
             // Cek apakah yang login adalah Admin (idrole = 1)
             if ($data['idrole'] == 1) {
-                echo "<script>alert('Login berhasil! Selamat datang Admin, {$data['username']}'); window.location='dashboard_admin.php';</script>";
+                echo "<script>alert('Login berhasil! Selamat datang Admin, {$data['username']}'); window.location='../admin/dashboard_admin.php';</script>";
                 exit;
             } else {
                 // Jika bukan admin, arahkan ke beranda atau halaman lain
-                echo "<script>alert('Login berhasil! Selamat datang, {$data['username']}'); window.location='index.php';</script>";
+                echo "<script>alert('Login berhasil! Selamat datang, {$data['username']}'); window.location='../index.php';</script>";
                 exit;
             }
         } else {
-            echo "<script>alert('Password salah!'); window.location='login.php';</script>";
+            echo "<script>alert('Password salah!'); window.location='../login.php';</script>";
         }
     } else {
-        echo "<script>alert('Email/Username tidak ditemukan!'); window.location='login.php';</script>";
+        echo "<script>alert('Email/Username tidak ditemukan!'); window.location='../login.php';</script>";
     }
 }
 ?>

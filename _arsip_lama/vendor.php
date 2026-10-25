@@ -1,9 +1,9 @@
 <?php
-require 'koneksi.php';
+require '../config/koneksi.php';
 session_start();
 
 if (!isset($_SESSION['iduser']) || $_SESSION['idrole'] != 1) {
-    echo "<script>alert('Akses ditolak!'); window.location='login.php';</script>";
+    echo "<script>alert('Akses ditolak!'); window.location='../login.php';</script>";
     exit;
 }
 
@@ -65,7 +65,7 @@ if (isset($_POST['simpan_vendor'])) {
                 </div>
                 <div class="pt-3 border-top border-secondary border-opacity-25">
                     <span class="d-block small text-muted mb-2">Admin: <b><?= $_SESSION['username']; ?></b></span>
-                    <a href="logout.php" class="btn btn-danger btn-sm w-100 rounded-pill fw-bold"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a>
+                    <a href="../logout.php" class="btn btn-danger btn-sm w-100 rounded-pill fw-bold"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a>
                 </div>
             </div>
 

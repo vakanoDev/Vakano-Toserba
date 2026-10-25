@@ -1,5 +1,5 @@
 <?php
-require 'koneksi.php';
+require '../config/koneksi.php';
 
 if (isset($_POST['register'])) {
     $nama = mysqli_real_escape_string($conn, $_POST['nama']);
@@ -10,14 +10,14 @@ if (isset($_POST['register'])) {
 
     // 1. Validasi konfirmasi password
     if ($password !== $verifpw) {
-        echo "<script>alert('Konfirmasi password tidak sesuai!'); window.location='registrasi.php';</script>";
+        echo "<script>alert('Konfirmasi password tidak sesuai!'); window.location='../registrasi.php';</script>";
         exit;
     }
 
     // 2. Cek apakah email/username sudah terdaftar di database
     $cek_user = mysqli_query($conn, "SELECT * FROM user WHERE username = '$email'");
     if (mysqli_num_rows($cek_user) > 0) {
-        echo "<script>alert('Email/Username sudah terdaftar! Gunakan yang lain.'); window.location='registrasi.php';</script>";
+        echo "<script>alert('Email/Username sudah terdaftar! Gunakan yang lain.'); window.location='../registrasi.php';</script>";
         exit;
     }
 
@@ -28,13 +28,13 @@ if (isset($_POST['register'])) {
     $sql = "INSERT INTO user (username, password, idrole) VALUES ('$email', '$hashed_password', '$idrole')";
     
     if (mysqli_query($conn, $sql)) {
-        echo "<script>alert('Registrasi berhasil! Data telah tercatat pada sistem. Silakan Login.'); window.location='login.php';</script>";
+        echo "<script>alert('Registrasi berhasil! Data telah tercatat pada sistem. Silakan Login.'); window.location='../login.php';</script>";
     } else {
-        echo "<script>alert('Gagal registrasi: " . mysqli_error($conn) . "'); window.location='registrasi.php';</script>";
+        echo "<script>alert('Gagal registrasi: " . mysqli_error($conn) . "'); window.location='../registrasi.php';</script>";
     }
 } else {
     // Jika diakses secara langsung tanpa tombol submit, kembalikan ke halaman registrasi
-    header("Location: registrasi.php");
+    header("Location: ../registrasi.php");
     exit;
 }
 ?>

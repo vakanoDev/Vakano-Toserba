@@ -108,7 +108,7 @@
                             <p class="text-muted small">Masuk Vakano Toserba</p>
                         </div>
 
-                        <form action="proses_login.php" method="POST">
+                        <form action="proses/proses_login.php" method="POST">
                             <div class="mb-3">
                                 <label class="form-label small fw-bold">Email / Username</label>
                                 <div class="input-group">

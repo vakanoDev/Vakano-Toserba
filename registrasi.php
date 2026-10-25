@@ -1,5 +1,5 @@
 <?php
-require 'koneksi.php';
+require 'config/koneksi.php';
 ?>
 
 <!DOCTYPE html>
@@ -114,7 +114,7 @@ require 'koneksi.php';
                         </div>
                         
                         <!-- Form mengarah ke file proses_registrasi.php -->
-                        <form action="proses_registrasi.php" method="POST">
+                        <form action="proses/proses_registrasi.php" method="POST">
                             <div class="mb-3">
                                 <label class="form-label small fw-bold">Nama Lengkap</label>
                                 <div class="input-group">
