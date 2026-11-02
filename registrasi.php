@@ -138,9 +138,9 @@ require 'config/koneksi.php';
                                     <select name="idrole" class="form-select" required>
                                         <option value="" selected disabled>Pilih Role Pengguna</option>
                                         <?php
-                                        $query_role = mysqli_query($conn, "SELECT * FROM role");
+                                        $query_role = mysqli_query($conn, "SELECT idrole, nama_role FROM role_form_vu WHERE idrole <> 1 AND nama_role NOT IN ('Kandidat', 'Ditolak') ORDER BY idrole");
                                         while ($r = mysqli_fetch_assoc($query_role)) {
-                                            echo "<option value='{$r['idrole']}'>{$r['nama_role']}</option>";
+                                            echo "<option value='{$r['idrole']}'>" . htmlspecialchars($r['nama_role']) . "</option>";
                                         }
                                         ?>
                                     </select>

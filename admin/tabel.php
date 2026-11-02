@@ -1,7 +1,8 @@
 <?php
+// Halaman CRUD generik untuk semua tabel di config/tabel_config.php
+require __DIR__ . '/layout/auth.php';
 /** @var mysqli $conn */
 /** @var array $TABEL */
-require __DIR__ . '/layout/auth.php';
 
 $t = $_GET['t'] ?? 'barang';
 if (!isset($TABEL[$t])) $t = 'barang';      // hanya tabel dalam daftar yang boleh diakses
@@ -16,36 +17,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: tabel.php?t=$t"); exit;
     }
     try {
+        $id = $_POST['id'] ?? '';
+
         if (($_POST['aksi'] ?? '') === 'hapus') {
-            $id = $_POST['id'] ?? '';
-            $st = $conn->prepare("DELETE FROM `$t` WHERE `$pk` = ?");
+            // DELETE FROM ... WHERE ...  (query ada di config -> 'hapus')
+            $st = $conn->prepare($cfg['hapus']);
             $st->bind_param('s', $id);
             $st->execute();
             $_SESSION['flash'] = ['success', 'Data berhasil dihapus.'];
         } else {
-            $id = $_POST['id'] ?? '';
-            $fields = []; $vals = [];
+            // Kumpulkan nilai form sesuai urutan kolom di 'cols' (sama dengan urutan tanda ? di query)
+            $nilai = []; $tanpa_password = false;
             foreach ($cols as $c) {
                 $v = $_POST[$c['n']] ?? '';
                 if ($c['t'] === 'password') {
-                    if ($v === '') continue;            // kosong = password lama dipertahankan
+                    if ($v === '' && $id !== '') { $tanpa_password = true; continue; }   // edit + kosong = password lama dipakai
+                    if ($v === '') throw new Exception('Password wajib diisi.');
                     $v = hash('sha256', $v);
                 } elseif ($v === '') {
                     $v = null;
                 } elseif ($c['t'] === 'datetime') {
                     $v = str_replace('T', ' ', $v);
                 }
-                $fields[] = $c['n'];
-                $vals[]   = $v;
+                $nilai[] = $v;
             }
             if ($id === '') {
-                $sql = "INSERT INTO `$t` (`" . implode('`,`', $fields) . "`) VALUES (" . implode(',', array_fill(0, count($fields), '?')) . ")";
+                $sql = $cfg['tambah'];                                   // INSERT INTO ... VALUES (...)
             } else {
-                $sql = "UPDATE `$t` SET `" . implode('`=?, `', $fields) . "`=? WHERE `$pk` = ?";
-                $vals[] = $id;
+                $sql = $tanpa_password ? $cfg['ubah_tanpa_password'] : $cfg['ubah'];   // UPDATE ... SET ... WHERE ...
+                $nilai[] = $id;
             }
             $st = $conn->prepare($sql);
-            $st->bind_param(str_repeat('s', count($vals)), ...$vals);
+            $st->bind_param(str_repeat('s', count($nilai)), ...$nilai);
             $st->execute();
             $_SESSION['flash'] = ['success', 'Data berhasil disimpan.'];
         }
@@ -55,6 +58,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         elseif ($kode === 1452)  $pesan = 'Data induk (pilihan relasi) tidak ditemukan.';
         else                     $pesan = 'Gagal: ' . $ex->getMessage();
         $_SESSION['flash'] = ['danger', $pesan];
+    } catch (Exception $ex) {
+        $_SESSION['flash'] = ['danger', $ex->getMessage()];
     }
     header("Location: tabel.php?t=$t"); exit;
 }
@@ -63,11 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $lookup = [];
 foreach ($cols as $c) {
     if ($c['t'] !== 'fk') continue;
-    $ref = $c['ref']; $rpk = $TABEL[$ref]['pk']; $lab = $c['lab'];
-    $q = $lab !== '' ? "SELECT `$rpk` AS id, `$lab` AS lab FROM `$ref` ORDER BY `$rpk`"
-                     : "SELECT `$rpk` AS id, NULL AS lab FROM `$ref` ORDER BY `$rpk`";
     $lookup[$c['n']] = [];
-    foreach (mysqli_query($conn, $q) as $r) {
+    foreach (mysqli_query($conn, $c['pilih']) as $r) {   // SELECT id, lab FROM ... (query di config)
         $lookup[$c['n']][$r['id']] = $r['lab'] !== null ? $r['id'] . ' - ' . $r['lab'] : '#' . $r['id'];
     }
 }
@@ -93,7 +95,7 @@ require __DIR__ . '/layout/header.php';
     $id  = $_GET['id'] ?? '';
     $row = [];
     if ($id !== '') {
-        $st = $conn->prepare("SELECT * FROM `$t` WHERE `$pk` = ?");
+        $st = $conn->prepare($cfg['ambil']);          // SELECT * FROM ... WHERE ... = ?
         $st->bind_param('s', $id); $st->execute();
         $row = $st->get_result()->fetch_assoc() ?: [];
         if (!$row) $id = '';
@@ -145,46 +147,41 @@ require __DIR__ . '/layout/header.php';
     </div>
 
 <?php else:
-    // Daftar boleh dibaca dari VIEW (mis. akun_vu) dengan nama kolom sendiri; simpan/hapus tetap ke tabel asli
-    $sumber = $cfg['view']  ?? $t;
-    $vpk    = $cfg['vpk']   ?? $pk;
-    $vcols  = $cfg['vcols'] ?? $cols;
-    $data = mysqli_query($conn, "SELECT * FROM `$sumber` ORDER BY `$vpk` DESC LIMIT 500"); ?>
+    // Daftar = query SELECT di config ('sql'); kolom pertama = ID, judul kolom = alias AS
+    $data  = mysqli_query($conn, $cfg['sql']);
+    $kolom = array_column($data->fetch_fields(), 'name');
+    $idk   = $kolom[0];
+    $jml   = count($kolom) - 1; ?>
     <div class="card card-custom p-3">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
-                        <th>#<?= e($vpk); ?></th>
-                        <?php foreach ($vcols as $c): ?><th><?= e($c['l']); ?></th><?php endforeach; ?>
+                        <th><?= e($idk); ?></th>
+                        <?php foreach (array_slice($kolom, 1) as $k): ?><th><?= e($k); ?></th><?php endforeach; ?>
                         <th class="text-center" style="width:110px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                 <?php $ada = false; foreach ($data as $r): $ada = true; ?>
                     <tr>
-                        <td><?= e($r[$vpk]); ?></td>
-                        <?php foreach ($vcols as $c):
-                            $v = $r[$c['n']];
-                            if ($v === null)             $tampil = '-';
-                            elseif ($c['t'] === 'fk')        $tampil = $lookup[$c['n']][$v] ?? $v;
-                            elseif ($c['t'] === 'select')    $tampil = ($c['opt'][$v] ?? $v);
-                            else                             $tampil = $v; ?>
-                            <td><?= e($tampil); ?></td>
+                        <td><?= e($r[$idk]); ?></td>
+                        <?php foreach (array_slice($kolom, 1) as $k): ?>
+                            <td><?= e($r[$k] ?? '-'); ?></td>
                         <?php endforeach; ?>
                         <td class="text-center text-nowrap">
-                            <a href="tabel.php?t=<?= e($t); ?>&aksi=form&id=<?= e($r[$vpk]); ?>" class="btn btn-sm btn-warning"><i class="fa-solid fa-pen"></i></a>
+                            <a href="tabel.php?t=<?= e($t); ?>&aksi=form&id=<?= e($r[$idk]); ?>" class="btn btn-sm btn-warning"><i class="fa-solid fa-pen"></i></a>
                             <form method="POST" action="tabel.php?t=<?= e($t); ?>" class="d-inline" onsubmit="return confirm('Hapus data ini?');">
                                 <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']); ?>">
                                 <input type="hidden" name="aksi" value="hapus">
-                                <input type="hidden" name="id" value="<?= e($r[$vpk]); ?>">
+                                <input type="hidden" name="id" value="<?= e($r[$idk]); ?>">
                                 <button class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
                             </form>
                         </td>
                     </tr>
                 <?php endforeach; ?>
                 <?php if (!$ada): ?>
-                    <tr><td colspan="<?= count($vcols) + 2; ?>" class="text-center text-muted py-4">Belum ada data.</td></tr>
+                    <tr><td colspan="<?= $jml + 2; ?>" class="text-center text-muted py-4">Belum ada data.</td></tr>
                 <?php endif; ?>
                 </tbody>
             </table>

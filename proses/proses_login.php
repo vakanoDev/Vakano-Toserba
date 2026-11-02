@@ -1,16 +1,18 @@
 <?php
 require '../config/koneksi.php';
 /** @var mysqli $conn */
-/** @var array $TABEL */
 session_start();
 
 if (isset($_POST['login'])) {
-    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $email = $_POST['email'];
     $password = $_POST['password'];
 
-    $query = mysqli_query($conn, "SELECT * FROM user WHERE username = '$email'");
-    if (mysqli_num_rows($query) === 1) {
-        $data = mysqli_fetch_assoc($query);
+    $st = $conn->prepare("SELECT iduser, username, password, idrole FROM akun_form_vu WHERE username = ?");
+    $st->bind_param('s', $email);
+    $st->execute();
+    $query = $st->get_result();
+    if ($query->num_rows === 1) {
+        $data = $query->fetch_assoc();
         
         if (hash('sha256', $password) === $data['password']) {
             $_SESSION['iduser'] = $data['iduser'];
@@ -20,6 +22,10 @@ if (isset($_POST['login'])) {
             // Cek apakah yang login adalah Admin (idrole = 1)
             if ($data['idrole'] == 1) {
                 echo "<script>alert('Login berhasil! Selamat datang Admin, {$data['username']}'); window.location='../admin/dashboard_admin.php';</script>";
+                exit;
+            } elseif ($data['idrole'] == 7) {
+                // HRD (idrole = 7) -> dashboard HRD
+                echo "<script>alert('Login berhasil! Selamat datang HRD, {$data['username']}'); window.location='../hrd/dashboard_hrd.php';</script>";
                 exit;
             } else {
                 // Jika bukan admin, arahkan ke beranda atau halaman lain
