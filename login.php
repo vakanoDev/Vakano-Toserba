@@ -148,30 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="fa-solid fa-arrow-right text-sm group-hover:translate-x-1 transition"></i>
                 </button>
             </form>
-
-            <!-- Petunjuk Akun -->
-            <div class="mt-6 pt-5 border-t border-gray-100">
-                <div class="text-xs text-gray-500 mb-2 font-medium flex items-center justify-between">
-                    <span>Daftar Akun yang Tersedia:</span>
-                    <span class="text-emerald-600 font-semibold">2 Role Aktif</span>
-                </div>
-                <div class="grid grid-cols-2 gap-2 text-xs">
-                    <div class="p-2.5 rounded-lg bg-emerald-50/80 border border-emerald-100 text-emerald-900">
-                        <div class="font-bold flex items-center gap-1.5 text-emerald-800">
-                            <i class="fa-solid fa-shield-halved text-emerald-600"></i> Super Admin
-                        </div>
-                        <div class="text-gray-600 mt-1">User: <code class="font-mono bg-white px-1.5 py-0.5 rounded text-emerald-700 font-bold">deva</code></div>
-                    </div>
-                    <div class="p-2.5 rounded-lg bg-teal-50/80 border border-teal-100 text-teal-900">
-                        <div class="font-bold flex items-center gap-1.5 text-teal-800">
-                            <i class="fa-solid fa-cash-register text-teal-600"></i> Kasir
-                        </div>
-                        <div class="text-gray-600 mt-1">User: <code class="font-mono bg-white px-1.5 py-0.5 rounded text-teal-700 font-bold">vio</code></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+ </div>
         <!-- Footer -->
         <p class="text-center text-xs text-emerald-200/50 mt-6">
             &copy; <?= date('Y') ?> Fast Mart Store System. All rights reserved.
