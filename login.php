@@ -1,150 +1,197 @@
+<?php
+require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/includes/auth.php';
+
+if (isLoggedIn()) {
+    if (isSuperAdmin()) {
+        header('Location: dashboard.php');
+    } else {
+        header('Location: pos.php');
+    }
+    exit;
+}
+
+$error = '';
+$info = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = trim($_POST['username'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+    if (empty($username) || empty($password)) {
+        $error = 'Username dan password wajib diisi!';
+    } else {
+        $stmt = $pdo->prepare("
+            SELECT u.iduser, u.username, u.password, u.idrole, r.nama_role
+            FROM user u
+            JOIN role r ON u.idrole = r.idrole
+            WHERE u.username = ?
+            LIMIT 1
+        ");
+        $stmt->execute([$username]);
+        $user = $stmt->fetch();
+
+        if ($user && verifyUserPassword($password, $user['password'])) {
+            // Role check: Hanya Super Admin (1) dan Kasir (2) yang diizinkan saat ini
+            if ($user['idrole'] == 1 || $user['idrole'] == 2) {
+                $_SESSION['iduser']    = $user['iduser'];
+                $_SESSION['username']  = $user['username'];
+                $_SESSION['idrole']    = (int)$user['idrole'];
+                $_SESSION['nama_role'] = $user['nama_role'];
+
+                if ($user['idrole'] == 1) {
+                    header('Location: dashboard.php');
+                } else {
+                    header('Location: pos.php');
+                }
+                exit;
+            } else {
+                $error = 'Akses untuk role "' . htmlspecialchars($user['nama_role']) . '" belum dibuka. Saat ini sistem hanya diaktifkan untuk Super Admin & Kasir.';
+            }
+        } else {
+            $error = 'Username atau password tidak sesuai!';
+        }
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Vakano Toserba</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Login - Fast Mart</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            /* Hapus background gradient karena kita pakai video */
-            background-color: #000;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            font-family: 'Poppins', sans-serif;
-            color: #fff;
-            margin: 0;
-            overflow: hidden; /* Mencegah scroll yang tidak perlu */
-        }
-
-        /* --- STYLING UNTUK FULLSCREEN YOUTUBE BACKGROUND --- */
-        .video-background {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            min-width: 100vw;
-            min-height: 100vh;
-            width: 177.77vh; /* Aspect ratio 16:9 */
-            height: 56.25vw;
-            z-index: -2;
-            pointer-events: none; /* Agar tidak bisa diklik */
-        }
-        
-        /* Overlay gelap agar form login tetap terbaca jelas */
-        .video-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6); /* Transparansi hitam 60% */
-            z-index: -1;
-        }
-
-        /* --- STYLING FORM LOGIN --- */
-        .card-custom {
-            background: rgba(255, 255, 255, 0.88);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-            color: #333;
-            position: relative;
-            z-index: 10;
-        }
-        .btn-custom {
-            background: linear-gradient(135deg, #ff7f50 0%, #ff6348 100%);
-            border: none;
-            color: white;
-            transition: all 0.3s ease;
-        }
-        .btn-custom:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(255, 111, 97, 0.4);
-            color: white;
-        }
-        
-        /* Memastikan konten utama berada di atas video */
-        .content-wrapper {
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
 </head>
-<body>
+<body class="bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 min-h-screen flex items-center justify-center p-4">
 
-    <!-- YOUTUBE FULLSCREEN BACKGROUND -->
-    <!-- Ganti VIDEO_ID_DISINI dengan ID video yang diinginkan -->
-    <iframe class="video-background" 
-            src="https://www.youtube.com/embed/u_79vTsToz8?autoplay=1&mute=1&loop=1&playlist=u_79vTsToz8&controls=0&showinfo=0&autohide=1" 
-            frameborder="0" 
-            allow="autoplay; encrypted-media" 
-            allowfullscreen>
-    </iframe>
-    <!-- Overlay Gelap -->
-    <div class="video-overlay"></div>
-
-    <div class="content-wrapper">
-        <nav class="navbar navbar-dark bg-transparent py-3">
-            <div class="container">
-                <a href="index.php" class="navbar-brand text-light text-decoration-none">
-                    <i class="fa-solid fa-arrow-left me-2"></i> Kembali ke Beranda
-                </a>
+    <div class="w-full max-w-md">
+        <!-- Logo & Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 mb-3 shadow-lg shadow-emerald-500/10">
+                <i class="fa-solid fa-cart-shopping text-3xl"></i>
             </div>
-        </nav>
+            <h1 class="text-3xl font-extrabold text-white tracking-tight">Fast <span class="text-emerald-400">Mart</span></h1>
+            <p class="text-emerald-200/70 text-sm mt-1">Sistem Manajemen Toko & Point of Sale</p>
+        </div>
 
-        <div class="container my-auto py-4">
-            <div class="row justify-content-center">
-                <div class="col-md-5 col-lg-4">
-                    <div class="card-custom p-4 p-md-5">
-                        <div class="text-center mb-4">
-                            <h3 class="fw-bold text-dark">Silakan Login</h3>
-                            <p class="text-muted small">Masuk Vakano Toserba</p>
+        <!-- Card Login -->
+        <div class="bg-white/95 backdrop-blur-md rounded-3xl p-8 shadow-2xl border border-emerald-100">
+            <h2 class="text-xl font-bold text-gray-800 mb-2">Masuk ke Sistem</h2>
+            <p class="text-sm text-gray-500 mb-6">Silakan masukkan akun Anda untuk melanjutkan</p>
+
+            <?php if (!empty($error)): ?>
+                <div class="mb-5 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-start gap-3">
+                    <i class="fa-solid fa-triangle-exclamation text-rose-500 mt-0.5"></i>
+                    <div><?= $error ?></div>
+                </div>
+            <?php endif; ?>
+
+            <form method="POST" action="login.php" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Username</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-emerald-600">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input type="text" name="username" required autofocus
+                            placeholder="Masukkan username"
+                            value="<?= htmlspecialchars($_POST['username'] ?? '') ?>"
+                            class="w-full pl-11 pr-4 py-3 bg-gray-50 rounded-xl border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-emerald-600">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password" name="password" id="passwordInput" required
+                            placeholder="Masukkan password"
+                            class="w-full pl-11 pr-11 py-3 bg-gray-50 rounded-xl border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition text-sm">
+                        <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600">
+                            <i class="fa-solid fa-eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit"
+                    class="w-full mt-2 py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-600/30 transition duration-150 flex items-center justify-center gap-2 group">
+                    <span>Masuk</span>
+                    <i class="fa-solid fa-arrow-right text-sm group-hover:translate-x-1 transition"></i>
+                </button>
+            </form>
+
+            <!-- Petunjuk Akun -->
+            <div class="mt-6 pt-5 border-t border-gray-100">
+                <div class="text-xs text-gray-500 mb-2 font-medium flex items-center justify-between">
+                    <span>Daftar Akun yang Tersedia:</span>
+                    <span class="text-emerald-600 font-semibold">2 Role Aktif</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div class="p-2.5 rounded-lg bg-emerald-50/80 border border-emerald-100 text-emerald-900">
+                        <div class="font-bold flex items-center gap-1.5 text-emerald-800">
+                            <i class="fa-solid fa-shield-halved text-emerald-600"></i> Super Admin
                         </div>
-
-                        <form action="proses/proses_login.php" method="POST">
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold">Email / Username</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light"><i class="fa-solid fa-envelope text-muted"></i></span>
-                                    <input type="text" name="email" class="form-control" placeholder="Masukkan email/username" required>
-                                </div>
-                            </div>
-
-                            <div class="mb-4">
-                                <label class="form-label small fw-bold">Password</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light"><i class="fa-solid fa-lock text-muted"></i></span>
-                                    <input type="password" name="password" class="form-control" placeholder="••••••••" required>
-                                </div>
-                            </div>
-
-                            <div class="d-grid mb-3">
-                                <button type="submit" name="login" class="btn btn-custom btn-lg fw-bold rounded-pill">
-                                    <i class="fa-solid fa-right-to-bracket me-2"></i> Masuk
-                                </button>
-                            </div>
-
-                            <div class="text-center">
-                                <small class="text-muted">Belum punya akun? <a href="registrasi.php" class="text-success text-decoration-none fw-bold">Daftar di sini</a></small>
-                            </div>
-                        </form>
+                        <div class="text-gray-600 mt-1">User: <code class="font-mono bg-white px-1.5 py-0.5 rounded text-emerald-700 font-bold">deva</code></div>
+                    </div>
+                    <div class="p-2.5 rounded-lg bg-teal-50/80 border border-teal-100 text-teal-900">
+                        <div class="font-bold flex items-center gap-1.5 text-teal-800">
+                            <i class="fa-solid fa-cash-register text-teal-600"></i> Kasir
+                        </div>
+                        <div class="text-gray-600 mt-1">User: <code class="font-mono bg-white px-1.5 py-0.5 rounded text-teal-700 font-bold">vio</code></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <footer class="text-center text-light py-3 border-top border-secondary border-opacity-25">
-            <small class="text-white-50">&copy; 2026 Vakano Toserba &bull; PT Vakano Center</small>
-        </footer>
+        <!-- Footer -->
+        <p class="text-center text-xs text-emerald-200/50 mt-6">
+            &copy; <?= date('Y') ?> Fast Mart Store System. All rights reserved.
+        </p>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function togglePassword() {
+            const input = document.getElementById('passwordInput');
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
 </body>
 </html>
