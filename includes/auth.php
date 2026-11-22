@@ -1,6 +1,6 @@
 <?php
 /**
- * Fast Mart - Authentication & Session Helper
+ * Vakano Toserba - Authentication & Session Helper
  */
 
 if (session_status() === PHP_SESSION_NONE) {

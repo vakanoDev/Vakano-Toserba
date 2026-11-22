@@ -145,7 +145,7 @@ $margin_aktif = getActiveMargin($pdo);
         <!-- Printable Receipt Body -->
         <div id="printableArea" class="font-mono text-xs text-slate-700 leading-relaxed">
             <div class="text-center pb-3 border-b border-dashed border-slate-300">
-                <div class="font-extrabold text-base tracking-widest text-emerald-800 uppercase">FAST MART</div>
+                <div class="font-extrabold text-base tracking-widest text-emerald-800 uppercase">VAKANO TOSERBA</div>
                 <div class="text-[10px] text-slate-500">Jl. Raya Kampus No. 1, Kota</div>
                 <div class="text-[10px] text-slate-500">Telp: 0812-3456-7890</div>
             </div>
@@ -195,7 +195,7 @@ $margin_aktif = getActiveMargin($pdo);
             </div>
 
             <div class="text-center pt-3 text-[10px] text-slate-500">
-                <p>Terima kasih telah berbelanja di Fast Mart!</p>
+                <p>Terima kasih telah berbelanja di Vakano Toserba!</p>
                 <p>Barang yang sudah dibeli tidak dapat ditukar.</p>
             </div>
         </div>

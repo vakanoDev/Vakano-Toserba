@@ -12,7 +12,7 @@ $base_url = getBasePath();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $page_title ?? 'Fast Mart' ?> - Sistem Manajemen Toko</title>
+    <title><?= $page_title ?? 'Vakano Toserba' ?> - Sistem Manajemen Toko</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -64,7 +64,7 @@ $base_url = getBasePath();
                         <i class="fa-solid fa-cart-shopping text-sm"></i>
                     </div>
                     <div>
-                        <span class="font-extrabold text-lg text-slate-800 tracking-tight">Fast<span class="text-emerald-600">Mart</span></span>
+                        <span class="font-extrabold text-lg text-slate-800 tracking-tight">Vakano<span class="text-emerald-600">Toserba</span></span>
                     </div>
                 </a>
             </div>

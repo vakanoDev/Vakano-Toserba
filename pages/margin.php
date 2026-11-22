@@ -67,7 +67,7 @@ $margin_aktif = getActiveMargin($pdo);
         <div>
             <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Kelola Margin Penjualan</h1>
             <p class="text-xs text-slate-500 mt-1">
-                Margin menentukan keuntungan otomatis pada harga jual kasir: <code>Harga Jual = Harga Beli + (Harga Beli * Margin %)</code>.
+                Margin menentukan keuntungan otomatis pada harga jual kasir Vakano Toserba: <code>Harga Jual = Harga Beli + (Harga Beli * Margin %)</code>.
             </p>
         </div>
         <button type="button" onclick="openAddModal()"

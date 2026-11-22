@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Fast Mart</title>
+    <title>Login - Vakano Toserba</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 mb-3 shadow-lg shadow-emerald-500/10">
                 <i class="fa-solid fa-cart-shopping text-3xl"></i>
             </div>
-            <h1 class="text-3xl font-extrabold text-white tracking-tight">Fast <span class="text-emerald-400">Mart</span></h1>
+            <h1 class="text-3xl font-extrabold text-white tracking-tight">Vakano <span class="text-emerald-400">Toserba</span></h1>
             <p class="text-emerald-200/70 text-sm mt-1">Sistem Manajemen Toko & Point of Sale</p>
         </div>
 
@@ -151,7 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
  </div>
         <!-- Footer -->
         <p class="text-center text-xs text-emerald-200/50 mt-6">
-            &copy; <?= date('Y') ?> Fast Mart Store System. All rights reserved.
+            &copy; <?= date('Y') ?> Vakano Toserba Store System. All rights reserved.
         </p>
     </div>
 

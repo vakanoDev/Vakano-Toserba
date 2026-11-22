@@ -41,7 +41,7 @@ $recent_sales = $pdo->query("
                 </span>
                 <h1 class="text-2xl lg:text-3xl font-extrabold tracking-tight">Halo, <?= htmlspecialchars(getUsername()) ?>!</h1>
                 <p class="text-emerald-100/80 text-sm mt-1 max-w-xl">
-                    Sistem Fast Mart aktif. Margin penjualan aktif saat ini adalah <strong class="text-white bg-emerald-600/60 px-2 py-0.5 rounded"><?= $margin_aktif['persen'] ?>%</strong>.
+                    Sistem Vakano Toserba aktif. Margin penjualan aktif saat ini adalah <strong class="text-white bg-emerald-600/60 px-2 py-0.5 rounded"><?= $margin_aktif['persen'] ?>%</strong>.
                 </p>
             </div>
             <div class="flex items-center gap-2">

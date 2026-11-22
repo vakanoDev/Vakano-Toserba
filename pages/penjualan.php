@@ -122,7 +122,7 @@ if (isSuperAdmin()) {
 
         <div id="saleReceiptContent" class="font-mono text-xs text-slate-700 leading-relaxed">
             <div class="text-center pb-3 border-b border-dashed border-slate-300">
-                <div class="font-extrabold text-base tracking-widest text-emerald-800 uppercase">FAST MART</div>
+                <div class="font-extrabold text-base tracking-widest text-emerald-800 uppercase">VAKANO TOSERBA</div>
                 <div class="text-[10px] text-slate-500">Jl. Raya Kampus No. 1, Kota</div>
             </div>
             <div id="detailBody" class="py-3">

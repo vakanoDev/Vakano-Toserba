@@ -1,6 +1,6 @@
 <?php
 /**
- * Fast Mart - AJAX Endpoint for POS
+ * Vakano Toserba - AJAX Endpoint for POS
  */
 header('Content-Type: application/json; charset=utf-8');
 

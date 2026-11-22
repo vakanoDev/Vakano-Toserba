@@ -48,7 +48,7 @@ foreach ($logs as $l) {
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Kartu Stok & Riwayat Mutasi</h1>
-            <p class="text-xs text-slate-500 mt-1">Audit log pergerakan stok barang Fast Mart (Masuk Penerimaan, Keluar Penjualan, dan Retur).</p>
+            <p class="text-xs text-slate-500 mt-1">Audit log pergerakan stok barang Vakano Toserba (Masuk Penerimaan, Keluar Penjualan, dan Retur).</p>
         </div>
     </div>
 

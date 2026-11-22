@@ -1,6 +1,6 @@
 <?php
 /**
- * Fast Mart - Database Configuration & Helper Functions
+ * Vakano Toserba - Database Configuration & Helper Functions
  */
 
 $db_host = '127.0.0.1';

@@ -66,7 +66,7 @@ $vendor_list = $pdo->query("
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Master Vendor / Supplier</h1>
-            <p class="text-xs text-slate-500 mt-1">Daftar pemasok barang untuk pengadaan Fast Mart.</p>
+            <p class="text-xs text-slate-500 mt-1">Daftar pemasok barang untuk pengadaan Vakano Toserba.</p>
         </div>
         <button type="button" onclick="openAddModal()"
             class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition flex items-center gap-2 self-start">
