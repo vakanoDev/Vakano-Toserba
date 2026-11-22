@@ -60,22 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Ambil list satuan untuk dropdown
 $satuan_list = $pdo->query("SELECT * FROM satuan WHERE status = 1 ORDER BY nama_satuan ASC")->fetchAll();
 
-// Ambil list barang lengkap beserta stok dan harga jual
-$barang_list = $pdo->query("
-    SELECT 
-        b.idbarang,
-        b.nama,
-        b.jenis,
-        b.status,
-        b.harga AS harga_beli,
-        s.idsatuan,
-        s.nama_satuan,
-        fn_stok_barang(b.idbarang) AS stok,
-        fn_harga_jual(b.idbarang) AS harga_jual
-    FROM barang b
-    JOIN satuan s ON b.idsatuan = s.idsatuan
-    ORDER BY b.idbarang ASC
-")->fetchAll();
+// Ambil list barang lengkap beserta stok dan harga jual langsung dari VIEW vw_barang_stok
+$barang_list = $pdo->query("SELECT * FROM vw_barang_stok ORDER BY idbarang ASC")->fetchAll();
 
 $margin_aktif = getActiveMargin($pdo);
 ?>
@@ -136,7 +122,7 @@ $margin_aktif = getActiveMargin($pdo);
                         <?php foreach ($barang_list as $b): ?>
                             <tr class="hover:bg-slate-50/70 transition">
                                 <td class="py-3 px-4 font-mono font-bold text-slate-400">#<?= $b['idbarang'] ?></td>
-                                <td class="py-3 px-4 font-bold text-slate-800"><?= htmlspecialchars($b['nama']) ?></td>
+                                <td class="py-3 px-4 font-bold text-slate-800"><?= htmlspecialchars($b['nama_barang'] ?? $b['nama']) ?></td>
                                 <td class="py-3 px-4">
                                     <span class="px-2 py-0.5 rounded-md font-semibold text-[10px] <?= $b['jenis'] === 'M' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-blue-50 text-blue-700 border border-blue-200' ?>">
                                         <?= $b['jenis'] === 'M' ? 'Makanan' : 'Non-Makanan' ?>
@@ -260,7 +246,7 @@ function openEditModal(b) {
     document.getElementById('modalTitle').innerText = 'Edit Data Barang #' + b.idbarang;
     document.getElementById('formAction').value = 'update';
     document.getElementById('formIdbarang').value = b.idbarang;
-    document.getElementById('formNama').value = b.nama;
+    document.getElementById('formNama').value = b.nama_barang || b.nama;
     document.getElementById('formJenis').value = b.jenis;
     document.getElementById('formSatuan').value = b.idsatuan;
     document.getElementById('formHarga').value = b.harga_beli;

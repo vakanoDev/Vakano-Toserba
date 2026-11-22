@@ -21,13 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($username) || empty($password)) {
         $error = 'Username dan password wajib diisi!';
     } else {
-        $stmt = $pdo->prepare("
-            SELECT u.iduser, u.username, u.password, u.idrole, r.nama_role
-            FROM user u
-            JOIN role r ON u.idrole = r.idrole
-            WHERE u.username = ?
-            LIMIT 1
-        ");
+        // Data login dari VIEW vw_login (user + role)
+        $stmt = $pdo->prepare("SELECT * FROM vw_login WHERE username = ?");
         $stmt->execute([$username]);
         $user = $stmt->fetch();
 

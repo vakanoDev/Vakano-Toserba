@@ -28,9 +28,9 @@ function formatRupiah($angka) {
     return 'Rp ' . number_format((float)$angka, 0, ',', '.');
 }
 
-// Helper sanitize input
+// Helper bersihkan input (escape HTML dilakukan saat menampilkan, bukan saat menyimpan)
 function clean($data) {
-    return htmlspecialchars(trim($data ?? ''), ENT_QUOTES, 'UTF-8');
+    return trim($data ?? '');
 }
 
 // Ambil Margin Aktif

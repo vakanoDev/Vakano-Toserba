@@ -259,7 +259,8 @@ function renderProducts() {
     const grid = document.getElementById('productGrid');
 
     const filtered = allProducts.filter(item => {
-        const matchName = item.nama.toLowerCase().includes(searchVal);
+        const itemName = (item.nama_barang || item.nama || '').toLowerCase();
+        const matchName = itemName.includes(searchVal);
         const matchCat = (activeCategory === 'ALL') || (item.jenis === activeCategory);
         return matchName && matchCat;
     });
@@ -292,7 +293,7 @@ function renderProducts() {
                             Stok: ${stok} ${item.nama_satuan}
                         </span>
                     </div>
-                    <h4 class="font-bold text-slate-800 text-xs sm:text-sm line-clamp-2 leading-tight">${item.nama}</h4>
+                    <h4 class="font-bold text-slate-800 text-xs sm:text-sm line-clamp-2 leading-tight">${item.nama_barang || item.nama}</h4>
                 </div>
 
                 <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between">
@@ -323,16 +324,17 @@ function addToCart(idbarang) {
     }
 
     const exist = cart.find(c => c.idbarang == idbarang);
+    const prodName = item.nama_barang || item.nama;
     if (exist) {
         if (exist.qty + 1 > stok) {
-            Swal.fire('Batas Stok', `Maksimal pembelian untuk ${item.nama} adalah stok yang tersedia (${stok})`, 'warning');
+            Swal.fire('Batas Stok', `Maksimal pembelian untuk ${prodName} adalah stok yang tersedia (${stok})`, 'warning');
             return;
         }
         exist.qty += 1;
     } else {
         cart.push({
             idbarang: item.idbarang,
-            nama: item.nama,
+            nama: prodName,
             satuan: item.nama_satuan,
             harga: parseInt(item.harga_jual),
             stok: stok,

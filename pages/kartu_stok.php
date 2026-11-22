@@ -8,32 +8,27 @@ requireSuperAdmin();
 $idbarang_filter = (int)($_GET['idbarang'] ?? 0);
 $jenis_filter    = clean($_GET['jenis'] ?? '');
 
-$query = "
-    SELECT ks.*, b.nama AS nama_barang_real, s.nama_satuan
-    FROM kartu_stok ks
-    JOIN barang b ON ks.idbarang = b.idbarang
-    JOIN satuan s ON b.idsatuan = s.idsatuan
-    WHERE 1=1
-";
+// Query langsung dari VIEW vw_kartu_stok
+$query = "SELECT * FROM vw_kartu_stok WHERE 1=1";
 $params = [];
 
 if ($idbarang_filter > 0) {
-    $query .= " AND ks.idbarang = ?";
+    $query .= " AND idbarang = ?";
     $params[] = $idbarang_filter;
 }
 if (!empty($jenis_filter)) {
-    $query .= " AND ks.jenis_transaksi = ?";
+    $query .= " AND jenis_transaksi = ?";
     $params[] = $jenis_filter;
 }
 
-$query .= " ORDER BY ks.idkartu_stok DESC";
+$query .= " ORDER BY idkartu_stok DESC";
 
 $stmt = $pdo->prepare($query);
 $stmt->execute($params);
 $logs = $stmt->fetchAll();
 
-// List barang untuk dropdown filter
-$barang_list = $pdo->query("SELECT idbarang, nama FROM barang ORDER BY nama ASC")->fetchAll();
+// List barang untuk dropdown filter dari VIEW vw_barang_aktif
+$barang_list = $pdo->query("SELECT idbarang, nama FROM vw_barang_aktif ORDER BY nama ASC")->fetchAll();
 
 // Hitung akumulasi
 $total_masuk  = 0;
@@ -112,7 +107,7 @@ foreach ($logs as $l) {
                             <tr class="hover:bg-slate-50/70 transition">
                                 <td class="py-3 px-4 font-mono font-bold text-slate-400">#<?= $l['idkartu_stok'] ?></td>
                                 <td class="py-3 px-4 text-slate-500"><?= date('d/m/Y H:i:s', strtotime($l['created_at'])) ?></td>
-                                <td class="py-3 px-4 font-bold text-slate-800"><?= htmlspecialchars($l['nama_barang_real']) ?></td>
+                                <td class="py-3 px-4 font-bold text-slate-800"><?= htmlspecialchars($l['nama_barang']) ?></td>
                                 <td class="py-3 px-4">
                                     <?php if ($l['jenis_transaksi'] === 'M'): ?>
                                         <span class="px-2 py-0.5 rounded-md font-bold text-[10px] bg-emerald-100 text-emerald-800">

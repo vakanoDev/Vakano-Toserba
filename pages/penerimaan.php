@@ -58,33 +58,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'terim
     }
 }
 
-// Ambil list pengadaan yang memiliki sisa barang belum diterima
-$po_pending = $pdo->query("
-    SELECT DISTINCT p.idpengadaan, p.timestamp, v.nama_vendor
-    FROM pengadaan p
-    JOIN vendor v ON p.vendor_idvendor = v.idvendor
-    JOIN detail_pengadaan dp ON p.idpengadaan = dp.idpengadaan
-    WHERE fn_sisa_pengadaan(p.idpengadaan, dp.idbarang) > 0
-    ORDER BY p.idpengadaan DESC
-")->fetchAll();
+// Ambil list pengadaan yang masih punya sisa barang dari VIEW vw_pengadaan_belum_lengkap
+$po_pending = $pdo->query("SELECT * FROM vw_pengadaan_belum_lengkap ORDER BY idpengadaan DESC")->fetchAll();
 
-// Jika ada parameter ?po= di URL, ambil detail sisa barangnya
+// Jika ada parameter ?po= di URL, ambil detail sisa barangnya langsung dari VIEW vw_sisa_pengadaan
 $selected_po = (int)($_GET['po'] ?? ($po_pending[0]['idpengadaan'] ?? 0));
 $po_items = [];
 if ($selected_po > 0) {
-    $stmtItems = $pdo->prepare("
-        SELECT 
-            dp.idbarang,
-            b.nama,
-            s.nama_satuan,
-            dp.jumlah AS dipesan,
-            dp.harga_satuan,
-            fn_sisa_pengadaan(dp.idpengadaan, dp.idbarang) AS sisa
-        FROM detail_pengadaan dp
-        JOIN barang b ON dp.idbarang = b.idbarang
-        JOIN satuan s ON b.idsatuan = s.idsatuan
-        WHERE dp.idpengadaan = ? AND fn_sisa_pengadaan(dp.idpengadaan, dp.idbarang) > 0
-    ");
+    $stmtItems = $pdo->prepare("SELECT * FROM vw_sisa_pengadaan WHERE idpengadaan = ? AND sisa > 0");
     $stmtItems->execute([$selected_po]);
     $po_items = $stmtItems->fetchAll();
 }
@@ -191,7 +172,7 @@ $penerimaan_list = $pdo->query("
                     class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-bold">
                     <?php foreach ($po_pending as $po): ?>
                         <option value="<?= $po['idpengadaan'] ?>" <?= $selected_po == $po['idpengadaan'] ? 'selected' : '' ?>>
-                            PO #<?= $po['idpengadaan'] ?> - Vendor: <?= htmlspecialchars($po['nama_vendor']) ?> (<?= date('d/m/Y', strtotime($po['timestamp'])) ?>)
+                            PO #<?= $po['idpengadaan'] ?> - Vendor: <?= htmlspecialchars($po['nama_vendor']) ?> (<?= date('d/m/Y', strtotime($po['tanggal'])) ?>)
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -207,7 +188,7 @@ $penerimaan_list = $pdo->query("
                         <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-2">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    <div class="font-bold text-slate-800"><?= htmlspecialchars($it['nama']) ?></div>
+                                    <div class="font-bold text-slate-800"><?= htmlspecialchars($it['nama_barang']) ?></div>
                                     <div class="text-[10px] text-slate-500">Sisa belum diterima: <strong class="text-amber-700"><?= $it['sisa'] ?> <?= $it['nama_satuan'] ?></strong></div>
                                 </div>
                                 <span class="font-mono text-[11px] text-slate-500">PO: <?= formatRupiah($it['harga_satuan']) ?></span>

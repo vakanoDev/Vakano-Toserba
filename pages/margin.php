@@ -20,14 +20,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             try {
                 $pdo->beginTransaction();
+                $stmt = $pdo->prepare("INSERT INTO margin_penjualan (persen, status, iduser) VALUES (?, 0, ?)");
+                $stmt->execute([$persen, $iduser]);
                 if ($set_aktif) {
-                    $pdo->exec("UPDATE margin_penjualan SET status = 0");
+                    // Aktifkan margin baru lewat stored procedure (hanya 1 margin aktif)
+                    $sp = $pdo->prepare("CALL sp_aktifkan_margin(?)");
+                    $sp->execute([$pdo->lastInsertId()]);
+                    $sp->closeCursor();
                 }
-                $stmt = $pdo->prepare("
-                    INSERT INTO margin_penjualan (persen, status, iduser, created_at, updated_at)
-                    VALUES (?, ?, ?, NOW(), NOW())
-                ");
-                $stmt->execute([$persen, $set_aktif, $iduser]);
                 $pdo->commit();
                 $msg = 'Margin penjualan baru berhasil disimpan!';
             } catch (Exception $e) {
@@ -38,11 +38,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'activate') {
         $idmargin = (int)$_POST['idmargin'];
         try {
-            $pdo->beginTransaction();
-            $pdo->exec("UPDATE margin_penjualan SET status = 0");
-            $stmt = $pdo->prepare("UPDATE margin_penjualan SET status = 1, updated_at = NOW() WHERE idmargin_penjualan = ?");
-            $stmt->execute([$idmargin]);
-            $pdo->commit();
+            // Aktifkan margin lewat stored procedure (hanya 1 margin aktif)
+            $sp = $pdo->prepare("CALL sp_aktifkan_margin(?)");
+            $sp->execute([$idmargin]);
+            $sp->closeCursor();
             $msg = 'Margin berhasil diaktifkan!';
         } catch (Exception $e) {
             if ($pdo->inTransaction()) $pdo->rollBack();
@@ -52,12 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Ambil list margin
-$margin_list = $pdo->query("
-    SELECT m.*, u.username
-    FROM margin_penjualan m
-    LEFT JOIN user u ON m.iduser = u.iduser
-    ORDER BY m.idmargin_penjualan DESC
-")->fetchAll();
+$margin_list = $pdo->query("SELECT * FROM vw_margin ORDER BY idmargin_penjualan DESC")->fetchAll();
 
 $margin_aktif = getActiveMargin($pdo);
 ?>

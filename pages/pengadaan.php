@@ -19,18 +19,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
         $pdo->beginTransaction();
         try {
             // Insert header pengadaan
-            $stmt = $pdo->prepare("
-                INSERT INTO pengadaan (user_iduser, vendor_idvendor, status, subtotal_nilai, ppn, total_nilai)
-                VALUES (?, ?, 'A', 0, 0, 0)
-            ");
+            $stmt = $pdo->prepare("INSERT INTO pengadaan (user_iduser, vendor_idvendor, status) VALUES (?, ?, 'A')");
             $stmt->execute([$iduser, $idvendor]);
             $idpengadaan = $pdo->lastInsertId();
 
             // Insert detail pengadaan (trigger akan otomatis menghitung harga satuan & total)
-            $stmtDet = $pdo->prepare("
-                INSERT INTO detail_pengadaan (idpengadaan, idbarang, jumlah, harga_satuan, sub_total)
-                VALUES (?, ?, ?, 0, 0)
-            ");
+            $stmtDet = $pdo->prepare("INSERT INTO detail_pengadaan (idpengadaan, idbarang, jumlah) VALUES (?, ?, ?)");
 
             $hasItem = false;
             foreach ($items as $it) {
@@ -59,8 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
 // Ambil list vendor aktif
 $vendors = $pdo->query("SELECT * FROM vendor WHERE status = 'A' ORDER BY nama_vendor ASC")->fetchAll();
 
-// Ambil list barang aktif
-$barang_list = $pdo->query("SELECT b.*, s.nama_satuan FROM barang b JOIN satuan s ON b.idsatuan = s.idsatuan WHERE b.status = 1 ORDER BY b.nama ASC")->fetchAll();
+// Ambil list barang aktif menggunakan VIEW vw_barang_stok
+$barang_list = $pdo->query("SELECT idbarang, nama_barang AS nama, nama_satuan, harga_beli AS harga FROM vw_barang_stok WHERE status = 1 ORDER BY nama_barang ASC")->fetchAll();
 
 // Ambil daftar pengadaan dari view vw_pengadaan
 $pengadaan_list = $pdo->query("

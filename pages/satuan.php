@@ -50,14 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Ambil list satuan
-$satuan_list = $pdo->query("
-    SELECT s.*, COUNT(b.idbarang) AS total_barang
-    FROM satuan s
-    LEFT JOIN barang b ON s.idsatuan = b.idsatuan
-    GROUP BY s.idsatuan
-    ORDER BY s.idsatuan ASC
-")->fetchAll();
+// Ambil list satuan dari VIEW vw_satuan_total_barang
+$satuan_list = $pdo->query("SELECT * FROM vw_satuan_total_barang ORDER BY idsatuan ASC")->fetchAll();
 ?>
 
 <div class="space-y-6">

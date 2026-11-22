@@ -67,32 +67,7 @@ function getBasePath() {
     return '';
 }
 
-// Helper verifikasi password fleksibel (mendukung bcrypt $2b$, $2y$, sha256, atau plain text)
+// Verifikasi password: hash bcrypt dibuat dengan password_hash() di PHP
 function verifyUserPassword($inputPassword, $storedPassword) {
-    if (empty($storedPassword)) return false;
-
-    // Cek bcrypt standard
-    if (password_verify($inputPassword, $storedPassword)) {
-        return true;
-    }
-
-    // Cek jika hash memakai $2b$ (diubah ke format $2y$ untuk PHP)
-    if (strpos($storedPassword, '$2b$') === 0) {
-        $converted = '$2y$' . substr($storedPassword, 4);
-        if (password_verify($inputPassword, $converted)) {
-            return true;
-        }
-    }
-
-    // Cek SHA256
-    if (hash('sha256', $inputPassword) === $storedPassword) {
-        return true;
-    }
-
-    // Cek Plain
-    if ($inputPassword === $storedPassword) {
-        return true;
-    }
-
-    return false;
+    return !empty($storedPassword) && password_verify($inputPassword, $storedPassword);
 }

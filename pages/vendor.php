@@ -52,14 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Ambil list vendor
-$vendor_list = $pdo->query("
-    SELECT v.*, COUNT(p.idpengadaan) AS total_pengadaan
-    FROM vendor v
-    LEFT JOIN pengadaan p ON v.idvendor = p.vendor_idvendor
-    GROUP BY v.idvendor
-    ORDER BY v.idvendor ASC
-")->fetchAll();
+// Ambil list vendor dari VIEW vw_vendor_total_pengadaan
+$vendor_list = $pdo->query("SELECT * FROM vw_vendor_total_pengadaan ORDER BY idvendor ASC")->fetchAll();
 ?>
 
 <div class="space-y-6">

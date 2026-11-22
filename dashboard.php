@@ -5,28 +5,25 @@ require_once __DIR__ . '/includes/header.php';
 requireSuperAdmin();
 
 // Ambil Statistik
-$total_omzet = $pdo->query("SELECT IFNULL(SUM(total_nilai), 0) FROM penjualan")->fetchColumn();
+$total_omzet = $pdo->query("SELECT total_omzet FROM vw_omzet")->fetchColumn();
 $total_transaksi = $pdo->query("SELECT COUNT(*) FROM penjualan")->fetchColumn();
-$total_barang = $pdo->query("SELECT COUNT(*) FROM barang WHERE status = 1")->fetchColumn();
+$total_barang = $pdo->query("SELECT COUNT(*) FROM vw_barang_aktif")->fetchColumn();
 $margin_aktif = getActiveMargin($pdo);
 
-// Barang dengan stok kritis (stok <= 5)
+// Barang dengan stok kritis (stok <= 5) menggunakan VIEW vw_barang_stok
 $stok_kritis = $pdo->query("
-    SELECT b.idbarang, b.nama, s.nama_satuan, fn_stok_barang(b.idbarang) AS stok, fn_harga_jual(b.idbarang) AS harga_jual
-    FROM barang b
-    JOIN satuan s ON b.idsatuan = s.idsatuan
-    WHERE b.status = 1
-    HAVING stok <= 5
+    SELECT idbarang, nama_barang AS nama, nama_satuan, stok, harga_jual
+    FROM vw_barang_stok
+    WHERE status = 1 AND stok <= 5
     ORDER BY stok ASC
     LIMIT 5
 ")->fetchAll();
 
-// Transaksi Penjualan Terakhir
+// Transaksi Penjualan Terakhir menggunakan VIEW vw_riwayat_penjualan
 $recent_sales = $pdo->query("
-    SELECT p.idpenjualan, p.created_at, p.total_nilai, u.username
-    FROM penjualan p
-    JOIN user u ON p.iduser = u.iduser
-    ORDER BY p.idpenjualan DESC
+    SELECT idpenjualan, created_at, total_nilai, username
+    FROM vw_riwayat_penjualan
+    ORDER BY idpenjualan DESC
     LIMIT 5
 ")->fetchAll();
 ?>

@@ -6,30 +6,25 @@ requireKasirOrSuperAdmin();
 
 $iduser_filter = isKasir() ? getUserId() : (int)($_GET['kasir'] ?? 0);
 
-$query = "
-    SELECT p.*, u.username, m.persen AS margin_persen
-    FROM penjualan p
-    JOIN user u ON p.iduser = u.iduser
-    JOIN margin_penjualan m ON p.idmargin_penjualan = m.idmargin_penjualan
-    WHERE 1=1
-";
+// Ambil daftar transaksi penjualan dari VIEW vw_riwayat_penjualan
+$query = "SELECT * FROM vw_riwayat_penjualan WHERE 1=1";
 $params = [];
 
 if ($iduser_filter > 0) {
-    $query .= " AND p.iduser = ?";
+    $query .= " AND iduser = ?";
     $params[] = $iduser_filter;
 }
 
-$query .= " ORDER BY p.idpenjualan DESC";
+$query .= " ORDER BY idpenjualan DESC";
 
 $stmt = $pdo->prepare($query);
 $stmt->execute($params);
 $sales = $stmt->fetchAll();
 
-// List kasir untuk filter (hanya Super Admin)
+// List kasir untuk filter dari VIEW vw_user_role
 $cashiers = [];
 if (isSuperAdmin()) {
-    $cashiers = $pdo->query("SELECT iduser, username FROM user WHERE idrole IN (1, 2) ORDER BY username ASC")->fetchAll();
+    $cashiers = $pdo->query("SELECT iduser, username FROM vw_user_role WHERE nama_role IN ('Super Admin', 'Kasir') ORDER BY username ASC")->fetchAll();
 }
 ?>
 
@@ -73,7 +68,7 @@ if (isSuperAdmin()) {
                         <th class="py-3 px-4">No. Nota</th>
                         <th class="py-3 px-4">Waktu Transaksi</th>
                         <th class="py-3 px-4">Kasir Bertugas</th>
-                        <th class="py-3 px-4">Margin</th>
+                        <th class="py-3 px-4">Jumlah Item</th>
                         <th class="py-3 px-4">Subtotal</th>
                         <th class="py-3 px-4">PPN (11%)</th>
                         <th class="py-3 px-4">Total Bayar</th>
@@ -94,7 +89,7 @@ if (isSuperAdmin()) {
                                     </div>
                                     <span><?= htmlspecialchars($s['username']) ?></span>
                                 </td>
-                                <td class="py-3 px-4 text-slate-600 font-semibold"><?= $s['margin_persen'] ?>%</td>
+                                <td class="py-3 px-4 text-slate-600 font-semibold"><?= $s['total_item'] ?> Produk</td>
                                 <td class="py-3 px-4 font-mono text-slate-600"><?= formatRupiah($s['subtotal_nilai']) ?></td>
                                 <td class="py-3 px-4 font-mono text-slate-600"><?= formatRupiah($s['ppn']) ?></td>
                                 <td class="py-3 px-4 font-mono font-extrabold text-emerald-700"><?= formatRupiah($s['total_nilai']) ?></td>

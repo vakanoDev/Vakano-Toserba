@@ -61,13 +61,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Ambil list role
 $roles = $pdo->query("SELECT * FROM role ORDER BY idrole ASC")->fetchAll();
 
-// Ambil list user
-$user_list = $pdo->query("
-    SELECT u.iduser, u.username, u.idrole, r.nama_role
-    FROM user u
-    JOIN role r ON u.idrole = r.idrole
-    ORDER BY u.iduser ASC
-")->fetchAll();
+// Ambil list user menggunakan VIEW vw_user_role
+$user_list = $pdo->query("SELECT * FROM vw_user_role ORDER BY iduser ASC")->fetchAll();
 ?>
 
 <div class="space-y-6">

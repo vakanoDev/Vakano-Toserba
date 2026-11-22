@@ -19,23 +19,10 @@ if (!isSuperAdmin() && !isKasir()) {
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
-// 1. Ambil daftar barang aktif beserta stok & harga jual terbaru
+// 1. Ambil daftar barang aktif langsung dari VIEW vw_barang_stok
 if ($action === 'get_items') {
     try {
-        $stmt = $pdo->query("
-            SELECT 
-                b.idbarang,
-                b.nama,
-                b.jenis,
-                s.nama_satuan,
-                b.harga AS harga_beli,
-                fn_stok_barang(b.idbarang) AS stok,
-                fn_harga_jual(b.idbarang) AS harga_jual
-            FROM barang b
-            JOIN satuan s ON b.idsatuan = s.idsatuan
-            WHERE b.status = 1
-            ORDER BY b.nama ASC
-        ");
+        $stmt = $pdo->query("SELECT * FROM vw_barang_stok WHERE status = 1");
         $items = $stmt->fetchAll();
         echo json_encode(['status' => 'success', 'data' => $items]);
     } catch (Exception $e) {
@@ -56,18 +43,12 @@ if ($action === 'checkout') {
     $bayar_tunai = (int)($input['bayar_tunai'] ?? 0);
     $iduser      = getUserId();
 
-    // Dapatkan margin aktif
-    $margin = getActiveMargin($pdo);
-    $idmargin = $margin['idmargin_penjualan'];
-
     $pdo->beginTransaction();
     try {
         // Buat record penjualan induk
-        $stmt = $pdo->prepare("
-            INSERT INTO penjualan (iduser, idmargin_penjualan, subtotal_nilai, ppn, total_nilai)
-            VALUES (?, ?, 0, 0, 0)
-        ");
-        $stmt->execute([$iduser, $idmargin]);
+        // Margin aktif diambil oleh function fn_id_margin_aktif(); total dihitung trigger
+        $stmt = $pdo->prepare("INSERT INTO penjualan (iduser, idmargin_penjualan) VALUES (?, fn_id_margin_aktif())");
+        $stmt->execute([$iduser]);
         $idpenjualan = $pdo->lastInsertId();
 
         // Masukkan setiap item via Stored Procedure sp_tambah_detail_penjualan
@@ -115,13 +96,11 @@ if ($action === 'checkout') {
 
         $pdo->commit();
 
-        // Ambil detail penjualan untuk struk
+        // Ambil detail penjualan untuk struk menggunakan VIEW vw_penjualan
         $stmtDetail = $pdo->prepare("
-            SELECT dp.*, b.nama, s.nama_satuan
-            FROM detail_penjualan dp
-            JOIN barang b ON dp.idbarang = b.idbarang
-            JOIN satuan s ON b.idsatuan = s.idsatuan
-            WHERE dp.penjualan_idpenjualan = ?
+            SELECT nama_barang AS nama, harga_satuan, jumlah, subtotal
+            FROM vw_penjualan
+            WHERE idpenjualan = ?
         ");
         $stmtDetail->execute([$idpenjualan]);
         $details = $stmtDetail->fetchAll();

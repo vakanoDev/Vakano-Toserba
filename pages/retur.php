@@ -45,34 +45,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
     }
 }
 
-// Ambil list penerimaan yang ada
-$penerimaan_list = $pdo->query("
-    SELECT p.idpenerimaan, p.created_at, v.nama_vendor, pg.idpengadaan
-    FROM penerimaan p
-    JOIN pengadaan pg ON p.idpengadaan = pg.idpengadaan
-    JOIN vendor v ON pg.vendor_idvendor = v.idvendor
-    ORDER BY p.idpenerimaan DESC
-")->fetchAll();
+// Ambil list penerimaan + vendor dari VIEW vw_daftar_penerimaan
+$penerimaan_list = $pdo->query("SELECT * FROM vw_daftar_penerimaan ORDER BY idpenerimaan DESC")->fetchAll();
 
-// Detail item penerimaan yang bisa diretur
+// Detail item penerimaan yang bisa diretur dari VIEW vw_sisa_retur
 $selected_terima = (int)($_GET['idpenerimaan'] ?? ($penerimaan_list[0]['idpenerimaan'] ?? 0));
 $items_terima = [];
 if ($selected_terima > 0) {
-    $stmtItems = $pdo->prepare("
-        SELECT 
-            dp.iddetail_penerimaan,
-            dp.barang_idbarang,
-            b.nama,
-            s.nama_satuan,
-            dp.jumlah_terima,
-            dp.harga_satuan_terima,
-            fn_stok_barang(dp.barang_idbarang) AS stok_sekarang,
-            IFNULL((SELECT SUM(dr.jumlah) FROM detail_retur dr WHERE dr.iddetail_penerimaan = dp.iddetail_penerimaan), 0) AS sudah_diretur
-        FROM detail_penerimaan dp
-        JOIN barang b ON dp.barang_idbarang = b.idbarang
-        JOIN satuan s ON b.idsatuan = s.idsatuan
-        WHERE dp.idpenerimaan = ?
-    ");
+    $stmtItems = $pdo->prepare("SELECT * FROM vw_sisa_retur WHERE idpenerimaan = ?");
     $stmtItems->execute([$selected_terima]);
     $items_terima = $stmtItems->fetchAll();
 }
@@ -184,7 +164,7 @@ $retur_list = $pdo->query("SELECT * FROM vw_retur ORDER BY idretur DESC")->fetch
                         if ($sisaBisaRetur > 0):
                     ?>
                         <option value="<?= $it['iddetail_penerimaan'] ?>">
-                            <?= htmlspecialchars($it['nama']) ?> (Diterima: <?= $it['jumlah_terima'] ?>, Sisa: <?= $sisaBisaRetur ?>)
+                            <?= htmlspecialchars($it['nama_barang']) ?> (Diterima: <?= $it['jumlah_terima'] ?>, Sisa: <?= $sisaBisaRetur ?>)
                         </option>
                     <?php endif; endforeach; ?>
                 </select>
